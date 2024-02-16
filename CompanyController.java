@@ -1,4 +1,4 @@
-CompanyController.java
+
 @RestController
 @RequestMapping(&quot;/companies&quot;)
 public class CompanyController {
