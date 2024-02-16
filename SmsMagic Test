@@ -1,0 +1,187 @@
+Application.java:
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
+
+@SpringBootApplication
+@ComponentScan(basePackages = {&quot;com.example&quot;}) // Replace &quot;com.example&quot; with your base
+package
+public class Application {
+
+public static void main(String[] args) {
+SpringApplication.run(Application.class, args);
+}
+}
+User.java
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
+public class User {
+
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+private String username;
+private String email;
+
+// Getters and setters
+public Long getId() {
+return id;
+}
+
+public void setId(Long id) {
+this.id = id;
+}
+
+public String getUsername() {
+return username;
+}
+
+public void setUsername(String username) {
+this.username = username;
+}
+
+public String getEmail() {
+return email;
+}
+
+public void setEmail(String email) {
+this.email = email;
+}
+}
+UserController.java
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+@RestController
+@RequestMapping(&quot;/users&quot;)
+public class UserController {
+
+@Autowired
+private UserService userService;
+
+@GetMapping(&quot;/&quot;)
+public List&lt;User&gt; listUsers(@RequestParam(required = false) String username) {
+if (username != null) {
+return userService.findByUsername(username);
+} else {
+
+return userService.getAllUsers();
+}
+}
+
+@PutMapping(&quot;/{userId}&quot;)
+public ResponseEntity&lt;User&gt; updateUser(@PathVariable Long userId, @RequestBody User
+user) {
+User updatedUser = userService.updateUser(userId, user);
+if (updatedUser != null) {
+return ResponseEntity.ok(updatedUser);
+} else {
+return ResponseEntity.notFound().build();
+}
+}
+
+@GetMapping(&quot;/{userId}/profile&quot;)
+public ResponseEntity&lt;User&gt; getUserProfile(@PathVariable Long userId) {
+User user = userService.getUser(userId);
+if (user != null) {
+if (isValidEmail(user.getEmail())) {
+return ResponseEntity.ok(user);
+} else {
+return ResponseEntity.badRequest().build();
+}
+
+} else {
+return ResponseEntity.notFound().build();
+}
+}
+
+private boolean isValidEmail(String email) {
+String emailRegex = &quot;^[a-zA-Z0-9_+&amp;*-]+(?:\\.[a-zA-Z0-9_+&amp;*-]+)*@(?:[a-zA-Z0-9-
+]+\\.)+[a-zA-Z]{2,7}$&quot;;
+
+Pattern pattern = Pattern.compile(emailRegex);
+
+Matcher matcher = pattern.matcher(email);
+
+return matcher.matches();
+}
+}
+Client.java
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+
+@Entity
+
+public class Client {
+
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+private String name;
+private String email;
+private String phone;
+
+@ManyToOne
+private User user;
+
+@ManyToOne
+private Company company;
+
+// Getters and setters
+public Long getId() {
+return id;
+}
+
+public void setId(Long id) {
+this.id = id;
+}
+
+public String getName() {
+return name;
+}
+
+public void setName(String name) {
+this.name = name;
+}
+
+public String getEmail() {
+return email;
+}
+
+public void setEmail(String email) {
+this.email = email;
+}
+
+public String getPhone() {
+return phone;
+}
+
+public void setPhone(String phone) {
+this.phone = phone;
+}
+
+public User getUser() {
+return user;
+}
+
+public void setUser(User user) {
+this.user = user;
+}
+
+public Company getCompany() {
+return company;
+}
+
+public void setCompany(Company company) {
+this.company = company;
+}
+}
